@@ -339,7 +339,7 @@
         <p>Sediado na Aldeota, em Fortaleza, o escritório atende clientes em todo o Ceará e presta suporte jurídico remoto a empresas e pessoas físicas em outros estados, sempre com acompanhamento direto e linguagem clara sobre cada etapa do processo.</p>
         <blockquote class="about-quote">
           <p>Tratamos cada processo como o que ele representa para o cliente, não como um número.</p>
-          <cite>VJ Aragão &amp; Araujo Advogados</cite>
+          <cite>Aragão &amp; Araujo Advogados</cite>
         </blockquote>
       </div>
     </div>
@@ -465,8 +465,8 @@
           <label for="mensagem">Como podemos ajudar?</label>
           <textarea id="mensagem" name="mensagem" required></textarea>
         </div>
-        <button type="submit" class="btn btn-gold" style="justify-self:start;">Enviar mensagem</button>
-        <p class="form-note">Ao enviar, abriremos seu aplicativo de e-mail com a mensagem preenchida para o escritório.</p>
+        <button type="submit" class="btn btn-gold" style="justify-self:start;">Enviar pelo WhatsApp</button>
+        <p class="form-note">Ao enviar, abriremos o WhatsApp com a mensagem preenchida para o escritório.</p>
       </form>
       <div class="contact-address reveal">
         <dl>
@@ -475,9 +475,9 @@
           <dt>CNPJ</dt>
           <dd>67.547.006/0001-54</dd>
           <dt>Telefone</dt>
-          <dd><a href="tel:+5585000000000">(85) 0000-0000</a></dd>
+          <dd><a href="tel:+5585982116342">(85)98211-6342</a></dd>
           <dt>E-mail</dt>
-          <dd><a href="mailto:contato@vjaragaoaraujo.adv.br">contato@vjaragaoaraujo.adv.br</a></dd>
+          <dd><a href="mailto:contato@vjaragaoaraujo.adv.br">contato@aragaoearaujoaa.com.br</a></dd>
         </dl>
         <a class="map-link" href="https://www.google.com/maps/search/?api=1&query=Av.+Dom+Lu%C3%ADs%2C+300+-+Aldeota%2C+Fortaleza+-+CE%2C+60160-196" target="_blank" rel="noopener">Ver localização no mapa →</a>
       </div>
@@ -538,7 +538,7 @@
   }, { threshold: 0.12 });
   revealEls.forEach(el => io.observe(el));
 
-  // contact form -> mailto
+  // contact form -> WhatsApp
   const form = document.getElementById('contactForm');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -547,15 +547,15 @@
     const email = document.getElementById('email').value;
     const area = document.getElementById('area').value;
     const mensagem = document.getElementById('mensagem').value;
-    const subject = encodeURIComponent('Contato pelo site: ' + area);
-    const body = encodeURIComponent(
+    const mensagemFinal =
+      'Olá! Vim pelo site e gostaria de falar sobre um caso.\n\n' +
       'Nome: ' + nome + '\n' +
       'Telefone: ' + telefone + '\n' +
       'E-mail: ' + email + '\n' +
       'Área de interesse: ' + area + '\n\n' +
-      'Mensagem:\n' + mensagem
-    );
-    window.location.href = 'mailto:contato@vjaragaoaraujo.adv.br?subject=' + subject + '&body=' + body;
+      'Mensagem:\n' + mensagem;
+    const whatsappUrl = 'https://wa.me/5585982116342?text=' + encodeURIComponent(mensagemFinal);
+    window.open(whatsappUrl, '_blank');
   });
 
   document.getElementById('year').textContent = new Date().getFullYear();
