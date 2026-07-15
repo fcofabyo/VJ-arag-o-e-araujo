@@ -290,6 +290,15 @@
       color:rgba(18,32,58,0.6); margin-top:-14px; padding-left:16px;
       border-left:1px solid var(--line-strong);
     }
+    nav.primary-nav a{
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 720px){
+  nav.primary-nav a:active{
+    color: var(--gold);
+  }
+}
     .menu-toggle{display:flex;}
     .nav-cta{display:none;}
     .hero{padding:150px 0 80px;}
@@ -536,8 +545,7 @@
   window.addEventListener('scroll', () => {
     header.classList.toggle('scrolled', window.scrollY > 30);
   });
-
-  // mobile menu
+// mobile menu
   const menuToggle = document.getElementById('menuToggle');
   const primaryNav = document.getElementById('primaryNav');
   const navOverlay = document.getElementById('navOverlay');
@@ -547,28 +555,47 @@
     menuToggle.classList.add('open');
     navOverlay.classList.add('open');
     menuToggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
   }
   function closeNav(){
     primaryNav.classList.remove('open');
     menuToggle.classList.remove('open');
     navOverlay.classList.remove('open');
     menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
   }
   menuToggle.addEventListener('click', () => {
     if (primaryNav.classList.contains('open')) { closeNav(); } else { openNav(); }
   });
   navOverlay.addEventListener('click', closeNav);
-  primaryNav.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      const targetEl = document.querySelector(a.getAttribute('href'));
-      const wasOpen = primaryNav.classList.contains('open');
-      closeNav();
-      const delay = wasOpen ? 320 : 0;
-      setTimeout(() => {
-        if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, delay);
-    });
+
+  // delegação de evento: um único listener no container, mais confiável em mobile
+  primaryNav.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    e.preventDefault();
+
+    const targetEl = document.querySelector(link.getAttribute('href'));
+    if (!targetEl) return;
+
+    const wasOpen = primaryNav.classList.contains('open');
+
+    if (!wasOpen) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // espera a transição do menu terminar de verdade, com fallback de segurança
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    primaryNav.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, 400);
+
+    closeNav();
   });
 
   // reveal on scroll
