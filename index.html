@@ -114,8 +114,9 @@
   .nav-overlay{
     position:fixed; inset:0; background:rgba(10,21,38,0.45); z-index:140;
     opacity:0; visibility:hidden; transition:opacity .3s ease, visibility .3s ease;
+    pointer-events:none;
   }
-  .nav-overlay.open{ opacity:1; visibility:visible; }
+  .nav-overlay.open{ opacity:1; visibility:visible; pointer-events:none; }
 
   /* ---------- HERO ---------- */
   .hero{
@@ -284,21 +285,13 @@
       z-index:150;
     }
     nav.primary-nav.open{ opacity:1; transform:translateY(0); visibility:visible; pointer-events:auto; }
-    nav.primary-nav a{ font-size:16px; }
+    nav.primary-nav a{ font-size:16px; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+    nav.primary-nav a:active{ color:var(--gold); }
     nav.primary-nav .nav-sublink{
       display:block; font-size:13.5px; text-transform:none; letter-spacing:0;
       color:rgba(18,32,58,0.6); margin-top:-14px; padding-left:16px;
       border-left:1px solid var(--line-strong);
     }
-    nav.primary-nav a{
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-@media (max-width: 720px){
-  nav.primary-nav a:active{
-    color: var(--gold);
-  }
-}
     .menu-toggle{display:flex;}
     .nav-cta{display:none;}
     .hero{padding:150px 0 80px;}
@@ -545,92 +538,95 @@
   window.addEventListener('scroll', () => {
     header.classList.toggle('scrolled', window.scrollY > 30);
   });
-// mobile menu
-  const menuToggle = document.getElementById('menuToggle');
-  const primaryNav = document.getElementById('primaryNav');
-  const navOverlay = document.getElementById('navOverlay');
 
-  function openNav(){
-    primaryNav.classList.add('open');
-    menuToggle.classList.add('open');
-    navOverlay.classList.add('open');
-    menuToggle.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeNav(){
-    primaryNav.classList.remove('open');
-    menuToggle.classList.remove('open');
-    navOverlay.classList.remove('open');
-    menuToggle.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-  }
-  menuToggle.addEventListener('click', () => {
-    if (primaryNav.classList.contains('open')) { closeNav(); } else { openNav(); }
-  });
-  navOverlay.addEventListener('click', closeNav);
+// ========== MENU MOBILE ==========
+const menuToggle = document.getElementById('menuToggle');
+const primaryNav = document.getElementById('primaryNav');
+const navOverlay = document.getElementById('navOverlay');
 
-  // delegação de evento: um único listener no container, mais confiável em mobile
-  primaryNav.addEventListener('click', (e) => {
-    const link = e.target.closest('a[href^="#"]');
-    if (!link) return;
+// Função auxiliar para fechar menu
+function closeMenu() {
+  primaryNav.classList.remove('open');
+  menuToggle.classList.remove('open');
+  navOverlay.classList.remove('open');
+  menuToggle.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+// Abrir/Fechar menu
+menuToggle.addEventListener('click', () => {
+  primaryNav.classList.toggle('open');
+  menuToggle.classList.toggle('open');
+  navOverlay.classList.toggle('open');
+  menuToggle.setAttribute('aria-expanded', primaryNav.classList.contains('open'));
+  document.body.style.overflow = primaryNav.classList.contains('open') ? 'hidden' : '';
+});
+
+// Fechar menu ao clicar no overlay
+navOverlay.addEventListener('click', closeMenu);
+
+// Scroll para seção ao clicar em um link do menu
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a'); 
+  
+  if (!link) return;
+  
+  const href = link.getAttribute('href');
+  const inNav = link.closest('#primaryNav');
+  
+  if (inNav && href && href.startsWith('#')) {
     e.preventDefault();
-
-    const targetEl = document.querySelector(link.getAttribute('href'));
-    if (!targetEl) return;
-
-    const wasOpen = primaryNav.classList.contains('open');
-
-    if (!wasOpen) {
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
-
-    // espera a transição do menu terminar de verdade, com fallback de segurança
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
-    primaryNav.addEventListener('transitionend', finish, { once: true });
-    setTimeout(finish, 400);
-
-    closeNav();
-  });
-
-  // reveal on scroll
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in');
-        io.unobserve(entry.target);
+    e.stopPropagation();
+    
+    // Fechar menu
+    closeMenu();
+    
+    // Scroll para seção
+    setTimeout(() => {
+      const targetId = href.substring(1);
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    });
-  }, { threshold: 0.12 });
-  revealEls.forEach(el => io.observe(el));
+    }, 300);
+  }
+});
 
-  // contact form -> WhatsApp
-  const form = document.getElementById('contactForm');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('nome').value;
-    const telefone = document.getElementById('telefone').value;
-    const email = document.getElementById('email').value;
-    const area = document.getElementById('area').value;
-    const mensagem = document.getElementById('mensagem').value;
-    const mensagemFinal =
-      'Olá! Vim pelo site e gostaria de falar sobre um caso.\n\n' +
-      'Nome: ' + nome + '\n' +
-      'Telefone: ' + telefone + '\n' +
-      'E-mail: ' + email + '\n' +
-      'Área de interesse: ' + area + '\n\n' +
-      'Mensagem:\n' + mensagem;
-    const whatsappUrl = 'https://wa.me/5585982116342?text=' + encodeURIComponent(mensagemFinal);
-    window.open(whatsappUrl, '_blank');
+// ========== FIM MENU MOBILE ==========
+
+// reveal on scroll
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in');
+      io.unobserve(entry.target);
+    }
   });
+}, { threshold: 0.12 });
+revealEls.forEach(el => io.observe(el));
 
-  document.getElementById('year').textContent = new Date().getFullYear();
+// contact form -> WhatsApp
+const form = document.getElementById('contactForm');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const nome = document.getElementById('nome').value;
+  const telefone = document.getElementById('telefone').value;
+  const email = document.getElementById('email').value;
+  const area = document.getElementById('area').value;
+  const mensagem = document.getElementById('mensagem').value;
+  const mensagemFinal =
+    'Olá! Vim pelo site e gostaria de falar sobre um caso.\n\n' +
+    'Nome: ' + nome + '\n' +
+    'Telefone: ' + telefone + '\n' +
+    'E-mail: ' + email + '\n' +
+    'Área de interesse: ' + area + '\n\n' +
+    'Mensagem:\n' + mensagem;
+  const whatsappUrl = 'https://wa.me/5585982116342?text=' + encodeURIComponent(mensagemFinal);
+  window.open(whatsappUrl, '_blank');
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 
 </body>
